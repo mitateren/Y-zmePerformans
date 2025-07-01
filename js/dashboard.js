@@ -2,7 +2,11 @@ $(document).ready(function() {
     let jsonData = [];
     let currentSporcu = null;
     let chart = null;
-    let seciliYillar = [2024, 2025];
+    let seciliYillar = [2025];
+    let barajlarErkek = null;
+    let barajlarKadin = null;
+    let barajlarHazir = false;
+    let jsonHazir = false;
 
     // Yılları bul ve checkboxları oluştur
     function yilCheckboxlariniDoldur() {
@@ -27,14 +31,31 @@ $(document).ready(function() {
     // Checkbox değişince filtrele
     $(document).on('change', '.yil-checkbox', function() {
         seciliYillar = $('.yil-checkbox:checked').map(function(){ return parseInt(this.value); }).get();
-        tabloVeGrafikGuncelle();
+        tabloVeGrafikGuncelleWrapper();
     });
+
+    function tabloVeGrafikGuncelleWrapper() {
+        if (barajlarHazir && jsonHazir) {
+            tabloVeGrafikGuncelle();
+        }
+    }
 
     // JSON dosyasını yükle
     $.getJSON('yuzme_sonuclari.json', function(data) {
         jsonData = data;
+        jsonHazir = true;
         sporcuListesiniDoldur();
         yilCheckboxlariniDoldur();
+        tabloVeGrafikGuncelleWrapper();
+    });
+
+    // Baraj JSON dosyalarını yükle
+    $.when(
+        $.getJSON('baraj_10yas_erkek.json', function(data) { barajlarErkek = data; }),
+        $.getJSON('baraj_10yas_kadin.json', function(data) { barajlarKadin = data; })
+    ).then(function() {
+        barajlarHazir = true;
+        tabloVeGrafikGuncelleWrapper();
     });
 
     function sporcuListesiniDoldur() {
@@ -55,7 +76,7 @@ $(document).ready(function() {
         let ad = $(this).val();
         if (!ad) return;
         currentSporcu = ad;
-        tabloVeGrafikGuncelle();
+        tabloVeGrafikGuncelleWrapper();
     });
 
     function formatTarih(ms) {
@@ -73,6 +94,46 @@ $(document).ready(function() {
             (dakika < 10 ? '0' : '') + dakika + ':' +
             (kalanSaniye < 10 ? '0' : '') + kalanSaniye.toFixed(2)
         );
+    }
+
+    // Süre stringini saniyeye çevirir (örn: "01:05.75" -> 65.75)
+    function sureStringToSaniye(sure) {
+        if (!sure) return NaN;
+        sure = sure.trim().replace(',', '.');
+        // DSQ, DNS, vb. ise NaN döndür
+        if (isNaN(sure.replace(':', ''))) return NaN;
+        let parts = sure.split(':');
+        if (parts.length === 1) {
+            // Sadece saniye
+            return parseFloat(parts[0]);
+        } else if (parts.length === 2) {
+            // dakika:saniye
+            let dakika = parseInt(parts[0], 10);
+            let saniye = parseFloat(parts[1]);
+            return dakika * 60 + saniye;
+        } else if (parts.length === 3) {
+            // saat:dakika:saniye (gerekirse)
+            let saat = parseInt(parts[0], 10);
+            let dakika = parseInt(parts[1], 10);
+            let saniye = parseFloat(parts[2]);
+            return saat * 3600 + dakika * 60 + saniye;
+        }
+        return NaN;
+    }
+
+    // Branş adlarını normalize eden fonksiyon
+    function normalizeBrans(str) {
+        return (str || '')
+            .toLowerCase()
+            .replace(/ı/g, 'i')
+            .replace(/ş/g, 's')
+            .replace(/ç/g, 'c')
+            .replace(/ü/g, 'u')
+            .replace(/ö/g, 'o')
+            .replace(/ğ/g, 'g')
+            .replace(/\s+/g, '')
+            .replace(/m/g, '') // 50m Serbest -> 50 Serbest
+            .replace(/\./g, '');
     }
 
     function tabloVeGrafikGuncelle() {
@@ -122,7 +183,7 @@ $(document).ready(function() {
         let tumTarihlerLabel = tumTarihler.map(formatTarih);
 
         // Tablo başlıklarını oluştur
-        let headerHtml = '<th>Branş</th>';
+        let headerHtml = '<th>Branş</th><th>Katılım Barajı</th><th>Harcırah Barajı</th>';
         tumTarihlerLabel.forEach(function(tarih) {
             headerHtml += `<th>${tarih}</th>`;
         });
@@ -132,30 +193,61 @@ $(document).ready(function() {
         // Tablo satırlarını oluştur
         let bransFarkHtml = '';
         branslar.forEach(function(brans, bransIdx) {
+            // Barajları bul (sadece 2. Etap)
+            let sporcu = jsonData.find(x => x["Ad Soyad"] === currentSporcu);
+            let cinsiyet = sporcu ? sporcu["Cinsiyet"] : null;
+            let barajlar = (cinsiyet === 'Erkek') ? barajlarErkek : barajlarKadin;
+            let katilim = '';
+            let harcirah = '';
+            if (barajlar) {
+                let katilimObj = barajlar.find(b => b.etap === '2. Etap Katılım');
+                let harcirahObj = barajlar.find(b => b.etap === '2. Etap Harcırah');
+                if (katilimObj) {
+                    let bransBaraj = katilimObj.barajlar.find(b => normalizeBrans(b.brans) === normalizeBrans(brans));
+                    katilim = bransBaraj ? bransBaraj.sure : '';
+                }
+                if (harcirahObj) {
+                    let bransBaraj = harcirahObj.barajlar.find(b => normalizeBrans(b.brans) === normalizeBrans(brans));
+                    harcirah = bransBaraj ? bransBaraj.sure : '';
+                }
+            }
+            // Sporcunun en iyi süresini bul (bu branşta)
             let kayitlar = bransGrupla[brans].sort((a,b) => a["Tarih"] - b["Tarih"]);
+            let sporcuSureleri = kayitlar.map(k => sureStringToSaniye(k["Süre"])).filter(s => !isNaN(s));
+            let enIyiSporcuSuresi = sporcuSureleri.length > 0 ? Math.min(...sporcuSureleri) : null;
+            let katilimSaniye = sureStringToSaniye(katilim);
+            let harcirahSaniye = sureStringToSaniye(harcirah);
+            // Katılım ve harcırah barajı hücrelerini belirginleştir
+            let katilimTd = `<td>${katilim}</td>`;
+            let harcirahTd = `<td>${harcirah}</td>`;
+            if (enIyiSporcuSuresi !== null && !isNaN(katilimSaniye) && enIyiSporcuSuresi <= katilimSaniye) {
+                katilimTd = `<td style=\"background:#28a745;color:#fff;font-weight:bold;\">${katilim}</td>`;
+            }
+            if (enIyiSporcuSuresi !== null && !isNaN(harcirahSaniye) && enIyiSporcuSuresi <= harcirahSaniye) {
+                harcirahTd = `<td style=\"background:#007bff;color:#fff;font-weight:bold;\">${harcirah}</td>`;
+            }
             let sureler = tumTarihler.map(function(tarih) {
                 let kayit = kayitlar.find(x => x["Tarih"] === tarih);
                 return kayit ? kayit["Süre"] : '';
             });
             // Satırdaki en iyi süreyi bul (en düşük anlamlı süre, toleranslı)
             let anlamliSureler = sureler
-                .map(s => (s || '').trim().replace(',', '.'))
-                .filter(s => s && !isNaN(parseFloat(s)));
+                .map(s => sureStringToSaniye(s))
+                .filter(s => !isNaN(s));
             let enIyiSure = null;
             if (anlamliSureler.length > 0) {
-                enIyiSure = Math.min(...anlamliSureler.map(s => parseFloat(s)));
+                enIyiSure = Math.min(...anlamliSureler);
             }
             // Sadece ilk karşılaşılan en iyi süreyi vurgula
             let enIyiVurgulandi = false;
             // Her branş için benzersiz canvas id'si
             let canvasId = `sparkline_${bransIdx}`;
-            bransFarkHtml += `<tr><td>${brans}</td>`;
+            bransFarkHtml += `<tr><td>${brans}</td>${katilimTd}${harcirahTd}`;
             sureler.forEach(function(sure) {
-                let sureTemiz = (sure || '').trim().replace(',', '.');
+                let sureSaniye = sureStringToSaniye(sure);
                 let isBest = false;
-                if (!enIyiVurgulandi && sureTemiz && !isNaN(parseFloat(sureTemiz))) {
-                    let val = parseFloat(sureTemiz);
-                    if (enIyiSure !== null && Math.abs(val - enIyiSure) < 0.001) {
+                if (!enIyiVurgulandi && !isNaN(sureSaniye)) {
+                    if (enIyiSure !== null && Math.abs(sureSaniye - enIyiSure) < 0.001) {
                         isBest = true;
                         enIyiVurgulandi = true;
                     }
