@@ -9,7 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .passed-baraj { background: #28a745 !important; color: #fff !important; font-weight: bold; }
-        .not-passed { color: #888; font-weight: bold; }
+        .not-passed { color: #888 !important; font-weight: bold; font-size: 0.85em; }
+        .baraj-time { font-size: 0.95em; }
         .table th, .table td { text-align: center; vertical-align: middle; }
     </style>
 </head>
@@ -45,6 +46,28 @@
             </div>
         </div>
     </div>
+    <div class="row mb-5">
+        <div class="col-12">
+            <h5>Katılım Barajı Tablosu</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle" id="katilimBarajiTablo">
+                    <thead id="katilimBarajiTabloHeader"></thead>
+                    <tbody id="katilimBarajiTabloBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-5">
+        <div class="col-12">
+            <h5>Harcırah Barajı Tablosu</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle" id="harcirahBarajiTablo">
+                    <thead id="harcirahBarajiTabloHeader"></thead>
+                    <tbody id="harcirahBarajiTabloBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-12">
             <h5>Sporcular Satırda, Branşlar Sütunda</h5>
@@ -52,6 +75,29 @@
                 <table class="table table-bordered align-middle" id="sporcu_brans_tablo">
                     <thead id="sporcu_brans_thead"></thead>
                     <tbody id="sporcu_brans_tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Yeni Baraj Tabloları -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h5>Sporcular Satırda, Branşlar Sütunda Katılım Barajı Tablosu</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle" id="sporcu_brans_katilim_tablo">
+                    <thead id="sporcu_brans_katilim_thead"></thead>
+                    <tbody id="sporcu_brans_katilim_tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-5">
+        <div class="col-12">
+            <h5>Sporcular Satırda, Branşlar Sütunda Harcırah Barajı Tablosu</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle" id="sporcu_brans_harcirah_tablo">
+                    <thead id="sporcu_brans_harcirah_thead"></thead>
+                    <tbody id="sporcu_brans_harcirah_tbody"></tbody>
                 </table>
             </div>
         </div>

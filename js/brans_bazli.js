@@ -13,7 +13,20 @@ $(document).ready(function() {
 
     function bransListesiniDoldur() {
         let branslar = [...new Set(jsonData.map(x => x["Branş"]))];
+        // Sadece geçerli branş isimlerini al: boş, sayı, tarih gibi olanları çıkar
+        branslar = branslar.filter(function(brans) {
+            if (!brans) return false;
+            // Sayı ise alma
+            if (!isNaN(brans)) return false;
+            // Tarih formatı ise alma (ör: 2024-01-01 veya 01.01.2024)
+            if (/\d{4}-\d{2}-\d{2}/.test(brans)) return false;
+            if (/\d{2}\.\d{2}\.\d{4}/.test(brans)) return false;
+            // Çok kısa ise alma
+            if (brans.length < 3) return false;
+            return true;
+        });
         branslar.sort();
+        $('#bransSelect').empty().append('<option value="">Branş seçiniz...</option>');
         branslar.forEach(function(brans) {
             $('#bransSelect').append(`<option value="${brans}">${brans}</option>`);
         });
@@ -95,11 +108,20 @@ $(document).ready(function() {
     // Baraj JSON dosyalarını yükle
     window.barajlarErkek = null;
     window.barajlarKadin = null;
-    $.getJSON('baraj_10yas_erkek.json', function(data) { window.barajlarErkek = data; });
-    $.getJSON('baraj_10yas_kadin.json', function(data) { window.barajlarKadin = data; });
+    let barajlarHazir = false;
+    function barajlarKontrolEtVeGuncelle() {
+        if (window.barajlarErkek && window.barajlarKadin) {
+            barajlarHazir = true;
+            tabloVeGrafikGuncelle();
+        }
+    }
+    $.getJSON('baraj_10yas_erkek.json', function(data) { window.barajlarErkek = data; barajlarKontrolEtVeGuncelle(); });
+    $.getJSON('baraj_10yas_kadin.json', function(data) { window.barajlarKadin = data; barajlarKontrolEtVeGuncelle(); });
 
     function tabloVeGrafikGuncelle() {
         if (!seciliBrans) return;
+        if (!barajlarHazir) return;
+        // Seçili branş ve yıl için verileri filtrele
         let bransVeri = jsonData.filter(x => x["Branş"] === seciliBrans && seciliYillar.includes(new Date(x["Tarih"]).getFullYear()));
         let sporcus = [...new Set(bransVeri.map(x => x["Ad Soyad"]))];
         // Tüm tarihleri topla ve sırala
@@ -118,9 +140,13 @@ $(document).ready(function() {
         // Tablo satırları
         let tabloHtml = '';
         sporcus.forEach(function(sporcu, idx) {
-            // Cinsiyet bul
+            // Cinsiyet bul (önce bransVeri'den, yoksa jsonData'dan)
             let sporcuKayit = bransVeri.find(x => x["Ad Soyad"] === sporcu);
-            let cinsiyet = sporcuKayit ? sporcuKayit["Cinsiyet"] : 'Erkek';
+            let cinsiyet = sporcuKayit ? sporcuKayit["Cinsiyet"] : null;
+            if (!cinsiyet) {
+                let tumKayit = jsonData.find(x => x["Ad Soyad"] === sporcu && x["Cinsiyet"]);
+                cinsiyet = tumKayit ? tumKayit["Cinsiyet"] : 'Erkek';
+            }
             let katilim = getBaraj(seciliBrans, cinsiyet, 'Katılım');
             let harcirah = getBaraj(seciliBrans, cinsiyet, 'Harcırah');
             let katilimSaniye = sureStringToSaniye(katilim);
@@ -156,12 +182,16 @@ $(document).ready(function() {
         });
         $('#sporcularTablo tbody').html(tabloHtml);
 
-        // Grafik
+        // Grafik: Her sporcu için seçili branşta ve yıllarda tüm yarışların süreleri (tarihe göre)
         let datasets = sporcus.map(function(sporcu, idx) {
-            let veri = tumTarihler.map(function(tarih) {
-                let kayit = bransVeri.find(x => x["Ad Soyad"] === sporcu && x["Tarih"] === tarih);
-                return kayit ? parseFloat((kayit["Süre"] || '').replace(',', '.')) : null;
-            });
+            let kayitlar = bransVeri.filter(x => x["Ad Soyad"] === sporcu && x["Süre"]);
+            // Her yarış için {x: tarih string, y: süre} oluştur
+            let data = kayitlar.map(function(k) {
+                return {
+                    x: formatTarih(k["Tarih"]),
+                    y: sureStringToSaniye(k["Süre"])
+                };
+            }).filter(d => !isNaN(d.y));
             let renkler = [
                 'rgba(54, 162, 235, 0.7)',
                 'rgba(255, 99, 132, 0.7)',
@@ -172,7 +202,7 @@ $(document).ready(function() {
             ];
             return {
                 label: sporcu,
-                data: veri,
+                data: data,
                 backgroundColor: renkler[idx % renkler.length],
                 borderColor: renkler[idx % renkler.length],
                 fill: false,
@@ -180,6 +210,15 @@ $(document).ready(function() {
             };
         });
         if (chart) chart.destroy();
+        function saniyeToDakikaSaniye(saniye) {
+            saniye = Math.abs(saniye);
+            let dakika = Math.floor(saniye / 60);
+            let kalanSaniye = saniye % 60;
+            return (
+                (dakika < 10 ? '0' : '') + dakika + ':' +
+                (kalanSaniye < 10 ? '0' : '') + kalanSaniye.toFixed(2)
+            );
+        }
         chart = new Chart($('#bransChart'), {
             type: 'line',
             data: {
@@ -190,12 +229,104 @@ $(document).ready(function() {
                 responsive: true,
                 plugins: {
                     legend: { display: true },
-                    title: { display: false }
+                    title: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                let value = context.parsed.y;
+                                if (value == null || isNaN(value)) return label + '-';
+                                return label + saniyeToDakikaSaniye(value);
+                            }
+                        }
+                    }
                 },
                 scales: {
-                    y: { beginAtZero: false }
+                    x: {
+                        type: 'category',
+                        title: {
+                            display: true,
+                            text: 'Tarih'
+                        }
+                    },
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Süre (dk:ss.ss)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                if (value == null || isNaN(value)) return '-';
+                                return saniyeToDakikaSaniye(value);
+                            }
+                        }
+                    }
                 }
             }
         });
+
+        // --- Katılım Barajı Tablosu ---
+        // Başlık
+        let katilimHeader = '<th>Branş</th>';
+        sporcus.forEach(function(sporcu) { katilimHeader += `<th>${sporcu}</th>`; });
+        $('#katilimBarajiTabloHeader').html(katilimHeader);
+        // Satırlar (sadece seçili branş)
+        let katilimBody = '';
+        katilimBody += `<tr><td>${seciliBrans}</td>`;
+        sporcus.forEach(function(sporcu) {
+            // Cinsiyet bul
+            let sporcuKayit = bransVeri.find(x => x["Ad Soyad"] === sporcu);
+            let cinsiyet = sporcuKayit ? sporcuKayit["Cinsiyet"] : null;
+            if (!cinsiyet) {
+                let tumKayit = jsonData.find(x => x["Ad Soyad"] === sporcu && x["Cinsiyet"]);
+                cinsiyet = tumKayit ? tumKayit["Cinsiyet"] : 'Erkek';
+            }
+            let katilim = getBaraj(seciliBrans, cinsiyet, 'Katılım');
+            let katilimSaniye = sureStringToSaniye(katilim);
+            // Sporcunun en iyi süresi
+            let kayitlar = bransVeri.filter(x => x["Ad Soyad"] === sporcu);
+            let sporcuSureleri = kayitlar.map(k => sureStringToSaniye(k["Süre"])).filter(s => !isNaN(s));
+            let enIyiSporcuSuresi = sporcuSureleri.length > 0 ? Math.min(...sporcuSureleri) : null;
+            let td = `<td>${katilim}</td>`;
+            if (enIyiSporcuSuresi !== null && !isNaN(katilimSaniye) && enIyiSporcuSuresi <= katilimSaniye) {
+                td = `<td style=\"background:#28a745;color:#fff;font-weight:bold;\">${katilim}</td>`;
+            }
+            katilimBody += td;
+        });
+        katilimBody += '</tr>';
+        $('#katilimBarajiTabloBody').html(katilimBody);
+
+        // --- Harcırah Barajı Tablosu ---
+        // Başlık
+        let harcirahHeader = '<th>Branş</th>';
+        sporcus.forEach(function(sporcu) { harcirahHeader += `<th>${sporcu}</th>`; });
+        $('#harcirahBarajiTabloHeader').html(harcirahHeader);
+        // Satırlar (sadece seçili branş)
+        let harcirahBody = '';
+        harcirahBody += `<tr><td>${seciliBrans}</td>`;
+        sporcus.forEach(function(sporcu) {
+            // Cinsiyet bul
+            let sporcuKayit = bransVeri.find(x => x["Ad Soyad"] === sporcu);
+            let cinsiyet = sporcuKayit ? sporcuKayit["Cinsiyet"] : null;
+            if (!cinsiyet) {
+                let tumKayit = jsonData.find(x => x["Ad Soyad"] === sporcu && x["Cinsiyet"]);
+                cinsiyet = tumKayit ? tumKayit["Cinsiyet"] : 'Erkek';
+            }
+            let harcirah = getBaraj(seciliBrans, cinsiyet, 'Harcırah');
+            let harcirahSaniye = sureStringToSaniye(harcirah);
+            // Sporcunun en iyi süresi
+            let kayitlar = bransVeri.filter(x => x["Ad Soyad"] === sporcu);
+            let sporcuSureleri = kayitlar.map(k => sureStringToSaniye(k["Süre"])).filter(s => !isNaN(s));
+            let enIyiSporcuSuresi = sporcuSureleri.length > 0 ? Math.min(...sporcuSureleri) : null;
+            let td = `<td>${harcirah}</td>`;
+            if (enIyiSporcuSuresi !== null && !isNaN(harcirahSaniye) && enIyiSporcuSuresi <= harcirahSaniye) {
+                td = `<td style=\"background:#007bff;color:#fff;font-weight:bold;\">${harcirah}</td>`;
+            }
+            harcirahBody += td;
+        });
+        harcirahBody += '</tr>';
+        $('#harcirahBarajiTabloBody').html(harcirahBody);
     }
 }); 
