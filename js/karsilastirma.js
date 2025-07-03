@@ -333,4 +333,40 @@ $(document).ready(function() {
         });
         $('#harcirahBarajiTabloBody').html(tbody);
     }
+
+    // Excel'e Aktarma Fonksiyonu
+    function exportAllTablesToExcel() {
+        const tableIds = [
+            'brans_sporcu_tablo',
+            'katilimBarajiTablo',
+            'harcirahBarajiTablo',
+            'sporcu_brans_tablo',
+            'sporcu_brans_katilim_tablo',
+            'sporcu_brans_harcirah_tablo'
+        ];
+        const wb = XLSX.utils.book_new();
+        tableIds.forEach(function(id) {
+            const table = document.getElementById(id);
+            if (table) {
+                const ws = XLSX.utils.table_to_sheet(table, {raw:true});
+                XLSX.utils.book_append_sheet(wb, ws, id.substring(0, 31));
+            }
+        });
+        XLSX.writeFile(wb, 'karsilastirma_tum_tablolar.xlsx');
+    }
+    $('#excelAktarBtn').on('click', exportAllTablesToExcel);
+
+    // PDF'e Aktarma Fonksiyonu
+    function exportAllTablesToPDF() {
+        const element = document.querySelector('.container.mt-4');
+        const opt = {
+            margin:       0.3,
+            filename:     'karsilastirma_tum_tablolar.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+    $('#pdfAktarBtn').on('click', exportAllTablesToPDF);
 }); 
