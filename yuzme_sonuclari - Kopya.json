@@ -5183,6 +5183,16 @@
     "Ad Soyad":"MIRZA KARALAR",
     "Doğum Yılı":2015,
     "Cinsiyet":"Erkek",
+    "Yarış Adı":"TÜRKİYE YÜZME FEDERASYONU 9 YAŞ ULUSAL GELİŞİM PROJESİ İL YÜZME ŞENLİKLERİ",
+    "Branş":"50m Serbest",
+    "Tarih":1716076800000,
+    "Süre":"00:50.75",
+    "Süre_saniye":0.5
+  },
+  {
+    "Ad Soyad":"MIRZA KARALAR",
+    "Doğum Yılı":2015,
+    "Cinsiyet":"Erkek",
     "Yarış Adı":"2023-2024 EĞİTİM ÖĞRETİM YILI OKULLARARASI YÜZME MİNİKLER A İL BİRİNCİLİĞİ YARIŞMALARI",
     "Branş":"50m Kelebek",
     "Tarih":1714176000000,
@@ -5848,155 +5858,5 @@
     "Tarih":1668211200000,
     "Süre":"01:38.68",
     "Süre_saniye":1.38
-  },
-  {
-    "Ad Soyad":"CEMRE EREN",
-    "Doğum Yılı":2015,
-    "Cinsiyet":"Kadın",
-    "Yarış Adı":"GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş":"100m Kelebek",
-    "Tarih":1752960000000,
-    "Süre":"01:36.07",
-    "Süre_saniye":1.36
-  },
-  {
-    "Ad Soyad":"CEMRE EREN",
-    "Doğum Yılı":2015,
-    "Cinsiyet":"Kadın",
-    "Yarış Adı":"GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş":"50m Sırtüstü",
-    "Tarih":1752960000000,
-    "Süre":"00:45.01",
-    "Süre_saniye":0.45
-  },
-  {
-    "Ad Soyad":"CEMRE EREN",
-    "Doğum Yılı":2015,
-    "Cinsiyet":"Kadın",
-    "Yarış Adı":"GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş":"50m Serbest",
-    "Tarih":1752873600000,
-    "Süre":"00:38.70",
-    "Süre_saniye":0.38
-  },
-  {
-    "Ad Soyad":"CEMRE EREN",
-    "Doğum Yılı":2015,
-    "Cinsiyet":"Kadın",
-    "Yarış Adı":"GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş":"50m Kelebek",
-    "Tarih":1752700800000,
-    "Süre":"00:40.85",
-    "Süre_saniye":0.40
-  },
-  {
-    "Ad Soyad": "BEGÜM VATANSEVER",
-    "Doğum Yılı": 2015,
-    "Cinsiyet": "Kadın",
-    "Yarış Adı": "GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş": "50m Kurbağalama",
-    "Tarih": 1752960000000,
-    "Süre": "00:46.35",
-    "Süre_saniye": 0.46
-  },
-  {
-    "Ad Soyad": "BEGÜM VATANSEVER",
-    "Doğum Yılı": 2015,
-    "Cinsiyet": "Kadın",
-    "Yarış Adı": "GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş": "50m Serbest",
-    "Tarih": 1752873600000,
-    "Süre": "00:34.26",
-    "Süre_saniye": 0.34
-  },
-  {
-    "Ad Soyad": "BEGÜM VATANSEVER",
-    "Doğum Yılı": 2015,
-    "Cinsiyet": "Kadın",
-    "Yarış Adı": "GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş": "100m Kurbağalama",
-    "Tarih": 1752700800000,
-    "Süre": "01:41.22",
-    "Süre_saniye": 1.41
-  },
-  {
-    "Ad Soyad": "BEGÜM VATANSEVER",
-    "Doğum Yılı": 2015,
-    "Cinsiyet": "Kadın",
-    "Yarış Adı": "GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş": "100m Serbest",
-    "Tarih": 1752700800000,
-    "Süre": "01:15.56",
-    "Süre_saniye": 1.15
-  },
-  {
-    "Ad Soyad": "BERAT HASRET",
-    "Doğum Yılı": 2015,
-    "Cinsiyet": "Erkek",
-    "Yarış Adı": "GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş": "200m Serbest",
-    "Tarih": 1752960000000,
-    "Süre": "03:20.32",
-    "Süre_saniye": 3.20
-  },
-  {
-    "Ad Soyad": "BERAT HASRET",
-    "Doğum Yılı": 2015,
-    "Cinsiyet": "Erkek",
-    "Yarış Adı": "GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş": "50m Serbest",
-    "Tarih": 1752873600000,
-    "Süre": "00:39.94",
-    "Süre_saniye": 0.39
-  },
-  {
-    "Ad Soyad": "BERAT HASRET",
-    "Doğum Yılı": 2015,
-    "Cinsiyet": "Erkek",
-    "Yarış Adı": "GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş": "50m Kelebek",
-    "Tarih": 1752700800000,
-    "Süre": "00:43.68",
-    "Süre_saniye": 0.43
-  },
-  {
-    "Ad Soyad": "ESLEM ULUSSEVEN",
-    "Doğum Yılı": 2015,
-    "Cinsiyet": "Kadın",
-    "Yarış Adı": "GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş": "100m Kelebek",
-    "Tarih": 1752960000000,
-    "Süre": "01:18.87",
-    "Süre_saniye": 1.18
-  },
-  {
-    "Ad Soyad": "ESLEM ULUSSEVEN",
-    "Doğum Yılı": 2015,
-    "Cinsiyet": "Kadın",
-    "Yarış Adı": "GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş": "200m Serbest",
-    "Tarih": 1752960000000,
-    "Süre": "02:40.45",
-    "Süre_saniye": 2.40
-  },
-  {
-    "Ad Soyad": "ESLEM ULUSSEVEN",
-    "Doğum Yılı": 2015,
-    "Cinsiyet": "Kadın",
-    "Yarış Adı": "GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş": "50m Kelebek",
-    "Tarih": 1752700800000,
-    "Süre": "00:36.79",
-    "Süre_saniye": 0.36
-  },
-  {
-    "Ad Soyad": "ESLEM ULUSSEVEN",
-    "Doğum Yılı": 2015,
-    "Cinsiyet": "Kadın",
-    "Yarış Adı": "GEBZE TÜRKİYE YÜZME FEDERASYONU 10-11-12 YAŞ ULUSAL GELİŞİM LİGİ 2. ETAP MÜSABAKASI",
-    "Branş": "200m Karışık",
-    "Tarih": 1752700800000,
-    "Süre": "03:00.82",
-    "Süre_saniye": 3.00
   }
 ]
