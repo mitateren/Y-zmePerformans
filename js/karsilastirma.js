@@ -2,6 +2,7 @@ $(document).ready(function() {
     let jsonData = [];
     let barajlarErkek = null;
     let barajlarKadin = null;
+    let seciliSporcular = [];
     // Baraj JSON dosyalarını yükle
     $.getJSON('baraj_10yas_erkek.json', function(data) { barajlarErkek = data; tryRender(); });
     $.getJSON('baraj_10yas_kadin.json', function(data) { barajlarKadin = data; tryRender(); });
@@ -38,6 +39,7 @@ $(document).ready(function() {
 
     function tryRender() {
         if (!jsonData || !barajlarErkek || !barajlarKadin) return;
+        renderSporcuSecimListesi();
         renderBransSporcuTablo();
         renderSporcuBransTablo();
         renderKatilimBarajiTablo();
@@ -45,6 +47,24 @@ $(document).ready(function() {
         renderSporcuBransKatilimBarajiTablo();
         renderSporcuBransHarcirahBarajiTablo();
     }
+
+    function renderSporcuSecimListesi() {
+        let sporcus = [...new Set(jsonData.map(x => x["Ad Soyad"]))];
+        sporcus.sort();
+        const varsayilanlar = ["ALP İNAN","DENİZ YAĞCI","CEMRE EREN","ELA ALTINTAŞ","METE ALP ÇETİN","KAYA ACAR"];
+        let html = sporcus.map(sporcu => `
+            <label class='me-2'><input type='checkbox' class='sporcu-checkbox' value='${sporcu.replace(/'/g, "&#39;")}' ${varsayilanlar.includes(sporcu) ? 'checked' : ''}> ${sporcu}</label>
+        `).join('');
+        $("#sporcuSecimListesi").html(html);
+    }
+
+    $(document).on('click', '#seciliSporculariGoster', function() {
+        seciliSporcular = [];
+        $('.sporcu-checkbox:checked').each(function() {
+            seciliSporcular.push($(this).val());
+        });
+        tryRender();
+    });
 
     function getValidBranslar() {
         let branslar = [...new Set(jsonData.map(x => x["Branş"]))];
@@ -61,6 +81,8 @@ $(document).ready(function() {
     function renderBransSporcuTablo() {
         let branslar = getValidBranslar();
         let sporcus = [...new Set(jsonData.map(x => x["Ad Soyad"]))];
+        if (seciliSporcular.length > 0) sporcus = sporcus.filter(s => seciliSporcular.includes(s));
+        if (sporcus.length === 0) return;
         // Başlık
         let thead = '<tr><th>Branş</th><th>K.B.</th><th>H.B.</th>';
         sporcus.forEach(sporcu => {
@@ -107,6 +129,8 @@ $(document).ready(function() {
     function renderSporcuBransTablo() {
         let branslar = getValidBranslar();
         let sporcus = [...new Set(jsonData.map(x => x["Ad Soyad"]))];
+        if (seciliSporcular.length > 0) sporcus = sporcus.filter(s => seciliSporcular.includes(s));
+        if (sporcus.length === 0) return;
         // Başlık
         let thead = '<tr><th>Sporcu</th>';
         branslar.forEach(brans => {
@@ -168,6 +192,8 @@ $(document).ready(function() {
     function renderSporcuBransKatilimBarajiTablo() {
         let branslar = getValidBranslar();
         let sporcus = [...new Set(jsonData.map(x => x["Ad Soyad"]))];
+        if (seciliSporcular.length > 0) sporcus = sporcus.filter(s => seciliSporcular.includes(s));
+        if (sporcus.length === 0) return;
         let thead = '<tr><th>Sporcu</th>';
         branslar.forEach(brans => { thead += `<th>${brans}</th>`; });
         thead += '</tr>';
@@ -211,6 +237,8 @@ $(document).ready(function() {
     function renderSporcuBransHarcirahBarajiTablo() {
         let branslar = getValidBranslar();
         let sporcus = [...new Set(jsonData.map(x => x["Ad Soyad"]))];
+        if (seciliSporcular.length > 0) sporcus = sporcus.filter(s => seciliSporcular.includes(s));
+        if (sporcus.length === 0) return;
         let thead = '<tr><th>Sporcu</th>';
         branslar.forEach(brans => { thead += `<th>${brans}</th>`; });
         thead += '</tr>';
@@ -254,6 +282,8 @@ $(document).ready(function() {
     function renderKatilimBarajiTablo() {
         let branslar = getValidBranslar();
         let sporcus = [...new Set(jsonData.map(x => x["Ad Soyad"]))];
+        if (seciliSporcular.length > 0) sporcus = sporcus.filter(s => seciliSporcular.includes(s));
+        if (sporcus.length === 0) return;
         // Başlık
         let thead = '<tr><th>Branş</th><th>Baraj Süresi</th>';
         sporcus.forEach(sporcu => { thead += `<th>${sporcu}</th>`; });
@@ -296,6 +326,8 @@ $(document).ready(function() {
     function renderHarcirahBarajiTablo() {
         let branslar = getValidBranslar();
         let sporcus = [...new Set(jsonData.map(x => x["Ad Soyad"]))];
+        if (seciliSporcular.length > 0) sporcus = sporcus.filter(s => seciliSporcular.includes(s));
+        if (sporcus.length === 0) return;
         // Başlık
         let thead = '<tr><th>Branş</th><th>Baraj Süresi</th>';
         sporcus.forEach(sporcu => { thead += `<th>${sporcu}</th>`; });

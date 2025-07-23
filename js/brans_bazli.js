@@ -130,8 +130,9 @@ $(document).ready(function() {
             sporcus = [...new Set(jsonData.map(x => x["Ad Soyad"]))];
         }
         sporcus.sort();
+        const varsayilanlar = ["ALP İNAN","DENİZ YAĞCI","CEMRE EREN","ELA ALTINTAŞ","METE ALP ÇETİN","KAYA ACAR"];
         let html = sporcus.map(sporcu => `
-            <label class='me-2'><input type='checkbox' class='sporcu-checkbox' value='${sporcu.replace(/'/g, "&#39;")}' ${(sporcu === 'CEMRE EREN') ? 'checked' : ''}> ${sporcu}</label>
+            <label class='me-2'><input type='checkbox' class='sporcu-checkbox' value='${sporcu.replace(/'/g, "&#39;")}' ${varsayilanlar.includes(sporcu) ? 'checked' : ''}> ${sporcu}</label>
         `).join('');
         $("#sporcuSecimListesi").html(html);
     }
