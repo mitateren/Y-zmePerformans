@@ -3,6 +3,7 @@ $(document).ready(function() {
     let seciliBrans = null;
     let seciliYillar = [2025];
     let chart = null;
+    let seciliSporcular = [];
 
     // JSON dosyasını yükle
     $.getJSON('yuzme_sonuclari.json', function(data) {
@@ -36,6 +37,7 @@ $(document).ready(function() {
             seciliBrans = branslar[0];
             tabloVeGrafikGuncelle();
         }
+        renderSporcuSecimListesi();
     }
 
     $('#bransSelect').on('change', function() {
@@ -43,6 +45,7 @@ $(document).ready(function() {
         if (!brans) return;
         seciliBrans = brans;
         tabloVeGrafikGuncelle();
+        renderSporcuSecimListesi();
     });
 
     function yilCheckboxlariniDoldur() {
@@ -67,6 +70,7 @@ $(document).ready(function() {
     $(document).on('change', '.yil-checkbox', function() {
         seciliYillar = $('.yil-checkbox:checked').map(function(){ return parseInt(this.value); }).get();
         tabloVeGrafikGuncelle();
+        renderSporcuSecimListesi();
     });
 
     function formatTarih(ms) {
@@ -118,12 +122,49 @@ $(document).ready(function() {
     $.getJSON('baraj_10yas_erkek.json', function(data) { window.barajlarErkek = data; barajlarKontrolEtVeGuncelle(); });
     $.getJSON('baraj_10yas_kadin.json', function(data) { window.barajlarKadin = data; barajlarKontrolEtVeGuncelle(); });
 
+    function renderSporcuSecimListesi() {
+        let sporcus = [];
+        if (seciliBrans) {
+            sporcus = [...new Set(jsonData.filter(x => x["Branş"] === seciliBrans && seciliYillar.includes(new Date(x["Tarih"]).getFullYear())).map(x => x["Ad Soyad"]))];
+        } else {
+            sporcus = [...new Set(jsonData.map(x => x["Ad Soyad"]))];
+        }
+        sporcus.sort();
+        let html = sporcus.map(sporcu => `
+            <label class='me-2'><input type='checkbox' class='sporcu-checkbox' value='${sporcu.replace(/'/g, "&#39;")}' ${(sporcu === 'CEMRE EREN') ? 'checked' : ''}> ${sporcu}</label>
+        `).join('');
+        $("#sporcuSecimListesi").html(html);
+    }
+
+    $(document).on('click', '#seciliSporculariGoster', function() {
+        seciliSporcular = [];
+        $('.sporcu-checkbox:checked').each(function() {
+            seciliSporcular.push($(this).val());
+        });
+        tabloVeGrafikGuncelle();
+    });
+
     function tabloVeGrafikGuncelle() {
         if (!seciliBrans) return;
         if (!barajlarHazir) return;
         // Seçili branş ve yıl için verileri filtrele
         let bransVeri = jsonData.filter(x => x["Branş"] === seciliBrans && seciliYillar.includes(new Date(x["Tarih"]).getFullYear()));
         let sporcus = [...new Set(bransVeri.map(x => x["Ad Soyad"]))];
+        // Eğer sporcu filtresi varsa uygula
+        if (seciliSporcular.length > 0) {
+            sporcus = sporcus.filter(s => seciliSporcular.includes(s));
+            bransVeri = bransVeri.filter(x => seciliSporcular.includes(x["Ad Soyad"]));
+        }
+        // Eğer hiç sporcu yoksa tablo ve grafikleri temizle
+        if (sporcus.length === 0) {
+            $('#sporcularTablo tbody').html('');
+            if (chart) chart.destroy();
+            $('#katilimBarajiTabloHeader').html('');
+            $('#katilimBarajiTabloBody').html('');
+            $('#harcirahBarajiTabloHeader').html('');
+            $('#harcirahBarajiTabloBody').html('');
+            return;
+        }
         // Tüm tarihleri topla ve sırala
         let tumTarihlerSet = new Set();
         bransVeri.forEach(function(item) { tumTarihlerSet.add(item["Tarih"]); });
