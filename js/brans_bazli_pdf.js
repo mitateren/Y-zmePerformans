@@ -3,8 +3,14 @@ $(document).ready(function() {
     let barajlarErkek = null;
     let barajlarKadin = null;
     let loaded = 0;
+    let seciliSporcular = [];
+    let seciliYillar = [2025];
     function tryRender() {
-        if (jsonData.length && barajlarErkek && barajlarKadin) renderAllBranches();
+        if (jsonData.length && barajlarErkek && barajlarKadin) {
+            renderYilSecimListesi();
+            renderSporcuSecimListesi();
+            renderAllBranches();
+        }
     }
     function getValidBranslar() {
         let branslar = [...new Set(jsonData.map(x => x["Branş"]))];
@@ -48,11 +54,46 @@ $(document).ready(function() {
         let bransBaraj = obj.barajlar.find(b => b.brans.toLowerCase() === brans.toLowerCase());
         return bransBaraj ? bransBaraj.sure : '';
     }
+    function renderSporcuSecimListesi() {
+        // Tüm sporcuları topla (branşlardan bağımsız, yıl filtresiyle)
+        let sporcus = [...new Set(jsonData.filter(x => seciliYillar.includes(new Date(x["Tarih"]).getFullYear())).map(x => x["Ad Soyad"]))];
+        sporcus.sort();
+        let html = sporcus.map(sporcu => `
+            <label class='me-2'><input type='checkbox' class='sporcu-checkbox' value='${sporcu.replace(/'/g, "&#39;")}' ${(sporcu === 'CEMRE EREN') ? 'checked' : ''}> ${sporcu}</label>
+        `).join('');
+        $("#sporcuSecimListesi").html(html);
+    }
+
+    $(document).on('click', '#seciliSporculariGoster', function() {
+        seciliSporcular = [];
+        $('.sporcu-checkbox:checked').each(function() {
+            seciliSporcular.push($(this).val());
+        });
+        renderAllBranches();
+    });
+
+    function renderYilSecimListesi() {
+        // Tüm yılları topla
+        let yillar = [...new Set(jsonData.map(x => (new Date(x["Tarih"]).getFullYear())))];
+        yillar.sort((a, b) => b - a);
+        let html = yillar.map(yil => `
+            <label class='me-2'><input type='checkbox' class='yil-checkbox' value='${yil}' ${seciliYillar.includes(yil) ? 'checked' : ''}> ${yil}</label>
+        `).join('');
+        $("#yilSecimListesi").html(html);
+    }
+
+    $(document).on('change', '.yil-checkbox', function() {
+        seciliYillar = [];
+        $('.yil-checkbox:checked').each(function() {
+            seciliYillar.push(parseInt($(this).val()));
+        });
+        renderSporcuSecimListesi();
+        renderAllBranches();
+    });
+
     $.getJSON('yuzme_sonuclari.json', function(data) {
         jsonData = data.filter(function(x) {
-            if (!x["Tarih"]) return false;
-            let yil = new Date(x["Tarih"]).getFullYear();
-            return yil === 2025;
+            return x["Tarih"];
         });
         tryRender();
     });
@@ -61,9 +102,22 @@ $(document).ready(function() {
     function renderAllBranches() {
         let branslar = getValidBranslar();
         let allHtml = '';
+        // Eğer hiç sporcu seçili değilse hiçbir şey gösterme
+        if (seciliSporcular.length === 0) {
+            $('#allBranches').html('');
+            return;
+        }
         branslar.forEach(function(brans, idx) {
-            let bransVeri = jsonData.filter(x => x["Branş"] === brans);
+            // Yıl filtresi uygula
+            let bransVeri = jsonData.filter(x => x["Branş"] === brans && seciliYillar.includes(new Date(x["Tarih"]).getFullYear()));
             let sporcus = [...new Set(bransVeri.map(x => x["Ad Soyad"]))];
+            // Eğer seçim varsa, sadece seçili sporcuları göster
+            if (seciliSporcular.length > 0) {
+                sporcus = sporcus.filter(s => seciliSporcular.includes(s));
+                bransVeri = bransVeri.filter(x => seciliSporcular.includes(x["Ad Soyad"]));
+            }
+            // Eğer bu branşta hiç sporcu yoksa tablo ve grafik oluşturma
+            if (sporcus.length === 0) return;
             // Baraj sürelerini bul
             let kbE = getBarajFromJson(barajlarErkek, brans, 'Katılım');
             let kbK = getBarajFromJson(barajlarKadin, brans, 'Katılım');
@@ -104,8 +158,12 @@ $(document).ready(function() {
         $('#allBranches').html(allHtml);
         // Grafikler
         branslar.forEach(function(brans, idx) {
-            let bransVeri = jsonData.filter(x => x["Branş"] === brans);
+            let bransVeri = jsonData.filter(x => x["Branş"] === brans && seciliYillar.includes(new Date(x["Tarih"]).getFullYear()));
             let sporcus = [...new Set(bransVeri.map(x => x["Ad Soyad"]))];
+            if (seciliSporcular.length > 0) {
+                sporcus = sporcus.filter(s => seciliSporcular.includes(s));
+                bransVeri = bransVeri.filter(x => seciliSporcular.includes(x["Ad Soyad"]));
+            }
             let renkler = [
                 'rgba(54, 162, 235, 0.7)',
                 'rgba(255, 99, 132, 0.7)',
@@ -128,6 +186,12 @@ $(document).ready(function() {
                         y: sureStringToSaniye(k["Süre"])
                     };
                 }).filter(d => !isNaN(d.y));
+                // Tarihe göre sırala
+                data.sort((a, b) => {
+                    let t1 = new Date(kayitlar.find(k => formatTarih(k["Tarih"]) === a.x)["Tarih"]);
+                    let t2 = new Date(kayitlar.find(k => formatTarih(k["Tarih"]) === b.x)["Tarih"]);
+                    return t1 - t2;
+                });
                 return {
                     label: sporcu,
                     data: data,
@@ -139,7 +203,6 @@ $(document).ready(function() {
             });
             let ctx = document.getElementById('bransChart_' + idx);
             if (ctx) {
-                // Chart genişliğini tabloya uydur
                 let parent = ctx.parentElement;
                 let width = parent ? parent.offsetWidth : 1000;
                 ctx.width = width;
@@ -162,7 +225,6 @@ $(document).ready(function() {
                                         if (label) label += ': ';
                                         let value = context.parsed.y;
                                         if (value == null || isNaN(value)) return label + '-';
-                                        // Dakika:saniye.salise
                                         let saniye = Math.abs(value);
                                         let dakika = Math.floor(saniye / 60);
                                         let kalanSaniye = saniye % 60;

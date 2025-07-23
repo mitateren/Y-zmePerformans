@@ -2,8 +2,14 @@ $(document).ready(function() {
     let jsonData = [];
     let barajlarErkek = null;
     let barajlarKadin = null;
+    let seciliYillar = [2025];
+    let seciliSporcular = [];
     function tryRender() {
-        if (jsonData.length && barajlarErkek && barajlarKadin) renderAllAthletes();
+        if (jsonData.length && barajlarErkek && barajlarKadin) {
+            renderYilSecimListesi();
+            renderSporcuSecimListesi();
+            renderAllAthletes();
+        }
     }
     function getValidBranslar() {
         let branslar = [...new Set(jsonData.map(x => x["Branş"]))];
@@ -47,22 +53,66 @@ $(document).ready(function() {
         let bransBaraj = obj.barajlar.find(b => b.brans.toLowerCase() === brans.toLowerCase());
         return bransBaraj ? bransBaraj.sure : '';
     }
+    function renderYilSecimListesi() {
+        let yillar = [...new Set(jsonData.map(x => (new Date(x["Tarih"]).getFullYear())))];
+        yillar.sort((a, b) => b - a);
+        let html = yillar.map(yil => `
+            <label class='me-2'><input type='checkbox' class='yil-checkbox' value='${yil}' ${seciliYillar.includes(yil) ? 'checked' : ''}> ${yil}</label>
+        `).join('');
+        $("#yilSecimListesi").html(html);
+    }
+
+    $(document).on('change', '.yil-checkbox', function() {
+        seciliYillar = [];
+        $('.yil-checkbox:checked').each(function() {
+            seciliYillar.push(parseInt($(this).val()));
+        });
+        renderSporcuSecimListesi();
+        renderAllAthletes();
+    });
+
+    function renderSporcuSecimListesi() {
+        let sporcus = [...new Set(jsonData.filter(x => seciliYillar.includes(new Date(x["Tarih"]).getFullYear())).map(x => x["Ad Soyad"]))];
+        sporcus.sort();
+        let html = sporcus.map(sporcu => `
+            <label class='me-2'><input type='checkbox' class='sporcu-checkbox' value='${sporcu.replace(/'/g, "&#39;")}' ${(sporcu === 'CEMRE EREN') ? 'checked' : ''}> ${sporcu}</label>
+        `).join('');
+        $("#sporcuSecimListesi").html(html);
+    }
+
+    $(document).on('click', '#seciliSporculariGoster', function() {
+        seciliSporcular = [];
+        $('.sporcu-checkbox:checked').each(function() {
+            seciliSporcular.push($(this).val());
+        });
+        renderAllAthletes();
+    });
+
     $.getJSON('yuzme_sonuclari.json', function(data) {
         jsonData = data.filter(function(x) {
-            if (!x["Tarih"]) return false;
-            let yil = new Date(x["Tarih"]).getFullYear();
-            return yil === 2025;
+            return x["Tarih"];
         });
         tryRender();
     });
     $.getJSON('baraj_10yas_erkek.json', function(data) { barajlarErkek = data; tryRender(); });
     $.getJSON('baraj_10yas_kadin.json', function(data) { barajlarKadin = data; tryRender(); });
     function renderAllAthletes() {
-        let sporcus = [...new Set(jsonData.map(x => x["Ad Soyad"]))];
+        // Eğer hiç sporcu seçili değilse hiçbir şey gösterme
+        if (seciliSporcular.length === 0) {
+            $('#allAthletes').html('');
+            return;
+        }
+        let sporcus = [...new Set(jsonData.filter(x => seciliYillar.includes(new Date(x["Tarih"]).getFullYear())).map(x => x["Ad Soyad"]))];
+        // Eğer seçim varsa, sadece seçili sporcuları göster
+        if (seciliSporcular.length > 0) {
+            sporcus = sporcus.filter(s => seciliSporcular.includes(s));
+        }
         let branslar = getValidBranslar();
         let allHtml = '';
         sporcus.forEach(function(sporcu, idx) {
-            let sporcuVeri = jsonData.filter(x => x["Ad Soyad"] === sporcu);
+            let sporcuVeri = jsonData.filter(x => x["Ad Soyad"] === sporcu && seciliYillar.includes(new Date(x["Tarih"]).getFullYear()));
+            // Eğer bu sporcunun hiç verisi yoksa atla
+            if (sporcuVeri.length === 0) return;
             // Tüm tarihleri topla ve sırala
             let tumTarihlerSet = new Set();
             sporcuVeri.forEach(function(item) { tumTarihlerSet.add(item["Tarih"]); });
@@ -94,7 +144,8 @@ $(document).ready(function() {
         $('#allAthletes').html(allHtml);
         // Grafikler
         sporcus.forEach(function(sporcu, idx) {
-            let sporcuVeri = jsonData.filter(x => x["Ad Soyad"] === sporcu);
+            let sporcuVeri = jsonData.filter(x => x["Ad Soyad"] === sporcu && seciliYillar.includes(new Date(x["Tarih"]).getFullYear()));
+            if (sporcuVeri.length === 0) return;
             let renkler = [
                 'rgba(54, 162, 235, 0.7)',
                 'rgba(255, 99, 132, 0.7)',
@@ -113,6 +164,12 @@ $(document).ready(function() {
                         y: sureStringToSaniye(k["Süre"])
                     };
                 }).filter(d => !isNaN(d.y));
+                // Tarihe göre sırala
+                data.sort((a, b) => {
+                    let t1 = new Date(kayitlar.find(k => formatTarih(k["Tarih"]) === a.x)["Tarih"]);
+                    let t2 = new Date(kayitlar.find(k => formatTarih(k["Tarih"]) === b.x)["Tarih"]);
+                    return t1 - t2;
+                });
                 return {
                     label: brans,
                     data: data,
