@@ -51,8 +51,8 @@ $(document).ready(function() {
 
     // Baraj JSON dosyalarını yükle
     $.when(
-        $.getJSON('baraj_10yas_erkek.json', function(data) { barajlarErkek = data; }),
-        $.getJSON('baraj_10yas_kadin.json', function(data) { barajlarKadin = data; })
+        $.getJSON('baraj_11yas_erkek.json', function(data) { barajlarErkek = data; }),
+        $.getJSON('baraj_11yas_kadin.json', function(data) { barajlarKadin = data; })
     ).then(function() {
         barajlarHazir = true;
         tabloVeGrafikGuncelleWrapper();

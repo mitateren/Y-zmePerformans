@@ -1,0 +1,26 @@
+[
+  {"etap":"2. Etap Katılım","cinsiyet":"Erkek","yas":11,"barajlar":[
+    {"brans":"50M Serbest","sure":"00:37,99"},
+    {"brans":"100M Serbest","sure":"01:23,99"},
+    {"brans":"200M Serbest","sure":"03:26,99"},
+    {"brans":"50M Sırtüstü","sure":"00:43,99"},
+    {"brans":"100M Sırtüstü","sure":"01:33,99"},
+    {"brans":"50M Kurbağalama","sure":"00:48,99"},
+    {"brans":"100M Kurbağalama","sure":"01:45,99"},
+    {"brans":"50M Kelebek","sure":"00:40,99"},
+    {"brans":"100M Kelebek","sure":"01:33,99"},
+    {"brans":"200M Karışık","sure":"03:23,99"}
+  ]},
+  {"etap":"2. Etap Harcırah","cinsiyet":"Erkek","yas":11,"barajlar":[
+    {"brans":"50M Serbest","sure":"00:32,99"},
+    {"brans":"100M Serbest","sure":"01:11,99"},
+    {"brans":"200M Serbest","sure":"02:35,99"},
+    {"brans":"50M Sırtüstü","sure":"00:37,99"},
+    {"brans":"100M Sırtüstü","sure":"01:20,99"},
+    {"brans":"50M Kurbağalama","sure":"00:41,99"},
+    {"brans":"100M Kurbağalama","sure":"01:32,99"},
+    {"brans":"50M Kelebek","sure":"00:34,99"},
+    {"brans":"100M Kelebek","sure":"01:19,99"},
+    {"brans":"200M Karışık","sure":"02:54,99"}
+  ]}
+] 

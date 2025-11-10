@@ -58,7 +58,7 @@ $(document).ready(function() {
         // Tüm sporcuları topla (branşlardan bağımsız, yıl filtresiyle)
         let sporcus = [...new Set(jsonData.filter(x => seciliYillar.includes(new Date(x["Tarih"]).getFullYear())).map(x => x["Ad Soyad"]))];
         sporcus.sort();
-        const varsayilanlar = ["ALP İNAN","DENİZ YAĞCI","CEMRE EREN","ELA ALTINTAŞ","METE ALP ÇETİN","KAYA ACAR"];
+        const varsayilanlar = ["ALP İNAN","DENİZ YAĞCİ","CEMRE EREN","ELA ALTINTAŞ",,"KAYA ACAR"];
         let html = sporcus.map(sporcu => `
             <label class='me-2'><input type='checkbox' class='sporcu-checkbox' value='${sporcu.replace(/'/g, "&#39;")}' ${varsayilanlar.includes(sporcu) ? 'checked' : ''}> ${sporcu}</label>
         `).join('');
@@ -98,8 +98,8 @@ $(document).ready(function() {
         });
         tryRender();
     });
-    $.getJSON('baraj_10yas_erkek.json', function(data) { barajlarErkek = data; tryRender(); });
-    $.getJSON('baraj_10yas_kadin.json', function(data) { barajlarKadin = data; tryRender(); });
+    $.getJSON('baraj_11yas_erkek.json', function(data) { barajlarErkek = data; tryRender(); });
+    $.getJSON('baraj_11yas_kadin.json', function(data) { barajlarKadin = data; tryRender(); });
     function renderAllBranches() {
         let branslar = getValidBranslar();
         let allHtml = '';

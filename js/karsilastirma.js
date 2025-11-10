@@ -4,8 +4,8 @@ $(document).ready(function() {
     let barajlarKadin = null;
     let seciliSporcular = [];
     // Baraj JSON dosyalarını yükle
-    $.getJSON('baraj_10yas_erkek.json', function(data) { barajlarErkek = data; tryRender(); });
-    $.getJSON('baraj_10yas_kadin.json', function(data) { barajlarKadin = data; tryRender(); });
+    $.getJSON('baraj_11yas_erkek.json', function(data) { barajlarErkek = data; tryRender(); });
+    $.getJSON('baraj_11yas_kadin.json', function(data) { barajlarKadin = data; tryRender(); });
     $.getJSON('yuzme_sonuclari.json', function(data) { jsonData = data; tryRender(); });
 
     function sureStringToSaniye(sure) {
@@ -51,7 +51,7 @@ $(document).ready(function() {
     function renderSporcuSecimListesi() {
         let sporcus = [...new Set(jsonData.map(x => x["Ad Soyad"]))];
         sporcus.sort();
-        const varsayilanlar = ["ALP İNAN","DENİZ YAĞCI","CEMRE EREN","ELA ALTINTAŞ","METE ALP ÇETİN","KAYA ACAR"];
+        const varsayilanlar = ["ALP İNAN","DENİZ YAĞCİ","CEMRE EREN","ELA ALTINTAŞ","KAYA ACAR"];
         let html = sporcus.map(sporcu => `
             <label class='me-2'><input type='checkbox' class='sporcu-checkbox' value='${sporcu.replace(/'/g, "&#39;")}' ${varsayilanlar.includes(sporcu) ? 'checked' : ''}> ${sporcu}</label>
         `).join('');

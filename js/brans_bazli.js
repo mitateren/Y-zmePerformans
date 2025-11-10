@@ -119,8 +119,8 @@ $(document).ready(function() {
             tabloVeGrafikGuncelle();
         }
     }
-    $.getJSON('baraj_10yas_erkek.json', function(data) { window.barajlarErkek = data; barajlarKontrolEtVeGuncelle(); });
-    $.getJSON('baraj_10yas_kadin.json', function(data) { window.barajlarKadin = data; barajlarKontrolEtVeGuncelle(); });
+    $.getJSON('baraj_11yas_erkek.json', function(data) { window.barajlarErkek = data; barajlarKontrolEtVeGuncelle(); });
+    $.getJSON('baraj_11yas_kadin.json', function(data) { window.barajlarKadin = data; barajlarKontrolEtVeGuncelle(); });
 
     function renderSporcuSecimListesi() {
         let sporcus = [];
@@ -130,7 +130,7 @@ $(document).ready(function() {
             sporcus = [...new Set(jsonData.map(x => x["Ad Soyad"]))];
         }
         sporcus.sort();
-        const varsayilanlar = ["ALP İNAN","DENİZ YAĞCI","CEMRE EREN","ELA ALTINTAŞ","METE ALP ÇETİN","KAYA ACAR"];
+        const varsayilanlar = ["ALP İNAN","DENİZ YAĞCİ","CEMRE EREN","ELA ALTINTAŞ","KAYA ACAR"];
         let html = sporcus.map(sporcu => `
             <label class='me-2'><input type='checkbox' class='sporcu-checkbox' value='${sporcu.replace(/'/g, "&#39;")}' ${varsayilanlar.includes(sporcu) ? 'checked' : ''}> ${sporcu}</label>
         `).join('');
